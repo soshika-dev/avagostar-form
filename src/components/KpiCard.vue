@@ -16,9 +16,9 @@ defineProps({
 </script>
 
 <template>
-  <div class="card bg-base-100 shadow-sm">
+  <div class="app-card">
     <div class="card-body gap-2">
-      <p class="text-sm text-base-content/60">{{ title }}</p>
+      <p class="text-xs font-semibold text-base-content/60">{{ title }}</p>
       <p class="text-2xl font-bold text-primary">{{ value }}</p>
       <p v-if="subtitle" class="text-xs text-base-content/50">{{ subtitle }}</p>
     </div>

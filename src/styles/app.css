@@ -8,6 +8,22 @@
 
 :root {
   color-scheme: light;
+  --app-radius: 1rem;
+  --app-radius-lg: 1.25rem;
+  --app-shadow: 0 20px 45px -28px rgba(15, 23, 42, 0.35);
+  --app-shadow-soft: 0 14px 30px -24px rgba(15, 23, 42, 0.3);
+  --chart-primary: #0e6a3b;
+  --chart-accent: #178a4a;
+  --chart-neutral: #cbd5f5;
+}
+
+[data-theme='avagostarDark'] {
+  color-scheme: dark;
+  --app-shadow: 0 20px 45px -28px rgba(0, 0, 0, 0.6);
+  --app-shadow-soft: 0 14px 30px -24px rgba(0, 0, 0, 0.5);
+  --chart-primary: #22c55e;
+  --chart-accent: #34d399;
+  --chart-neutral: #1f2937;
 }
 
 html {
@@ -16,7 +32,7 @@ html {
 }
 
 body {
-  @apply bg-base-200 text-base-content;
+  @apply bg-base-200 text-base-content antialiased;
 }
 
 #app {
@@ -26,6 +42,72 @@ body {
 input::placeholder,
 textarea::placeholder {
   @apply text-base-content/50;
+}
+
+.input,
+.select,
+.textarea {
+  @apply rounded-xl border-base-300 bg-base-100 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30;
+}
+
+.btn {
+  @apply rounded-xl;
+}
+
+.btn-primary {
+  @apply text-white shadow-md shadow-primary/20;
+}
+
+.btn-outline {
+  @apply border-base-300;
+}
+
+.navbar {
+  @apply backdrop-blur-sm;
+}
+
+.table thead th {
+  @apply bg-base-100/90 text-sm font-semibold text-base-content/70;
+}
+
+.table tbody tr {
+  @apply transition-colors;
+}
+
+.table tbody tr:hover {
+  @apply bg-base-200/60;
+}
+
+.app-card {
+  @apply border border-base-300/80 bg-base-100;
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow-soft);
+}
+
+.app-card-strong {
+  @apply border border-base-300 bg-base-100;
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+
+.app-section {
+  @apply rounded-2xl border border-base-300/70 bg-base-200/70 p-4;
+}
+
+.page-container {
+  @apply mx-auto w-full max-w-6xl;
+}
+
+.page-header {
+  @apply mb-6 flex flex-wrap items-center justify-between gap-4;
+}
+
+.page-title {
+  @apply text-2xl font-bold text-base-content;
+}
+
+.page-subtitle {
+  @apply text-sm text-base-content/60;
 }
 
 .datepicker-input {

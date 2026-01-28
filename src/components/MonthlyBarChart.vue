@@ -25,7 +25,7 @@ const width = computed(() => Math.max(props.series.length * (barWidth + barGap) 
 </script>
 
 <template>
-  <div class="card bg-base-100 shadow-sm">
+  <div class="app-card">
     <div class="card-body">
       <div class="flex items-start justify-between">
         <div>
@@ -45,7 +45,9 @@ const width = computed(() => Math.max(props.series.length * (barWidth + barGap) 
               :y="height - 28 - item.h"
               :width="barWidth"
               :height="item.h"
-              :fill="selectedMonth === item.month ? '#7fb0ff' : '#4b7dd8'"
+              :fill="
+                selectedMonth === item.month ? 'var(--chart-accent)' : 'var(--chart-primary)'
+              "
               rx="6"
               class="cursor-pointer"
               @click="emit('toggle', item.month)"
@@ -55,7 +57,8 @@ const width = computed(() => Math.max(props.series.length * (barWidth + barGap) 
               :y="height - 8"
               text-anchor="middle"
               font-size="11"
-              fill="#0b1220"
+              fill="currentColor"
+              class="text-base-content/70"
             >
               {{ Number(item.month) }}
             </text>

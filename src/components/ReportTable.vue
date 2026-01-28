@@ -1,5 +1,7 @@
 <script setup>
 import { computed } from 'vue';
+import EmptyState from './EmptyState.vue';
+import LoadingSkeleton from './LoadingSkeleton.vue';
 
 const props = defineProps({
   rows: {
@@ -22,6 +24,10 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  isLoading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['sort', 'update:rowsPerPage', 'next', 'prev']);
@@ -40,7 +46,7 @@ const sortIndicator = (key) => {
 </script>
 
 <template>
-  <div class="card bg-base-100 shadow-sm">
+  <div class="app-card">
     <div class="card-body gap-4">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <h3 class="font-semibold">گزارش تراکنش‌ها</h3>
@@ -59,9 +65,12 @@ const sortIndicator = (key) => {
         </label>
       </div>
 
-      <div class="overflow-x-auto">
+      <div v-if="isLoading">
+        <LoadingSkeleton :rows="5" />
+      </div>
+      <div v-else class="overflow-x-auto">
         <table class="table table-zebra">
-          <thead>
+          <thead class="sticky top-0 z-10">
             <tr>
               <th @click="emit('sort', 'receiver')">دریافت‌کننده {{ sortIndicator('receiver') }}</th>
               <th @click="emit('sort', 'payer')">پرداخت‌کننده {{ sortIndicator('payer') }}</th>
@@ -78,11 +87,11 @@ const sortIndicator = (key) => {
               <td>{{ row.currency }}</td>
               <td>{{ row.date }}</td>
             </tr>
-            <tr v-if="pagedRows.length === 0">
-              <td colspan="5" class="text-center text-base-content/60">هیچ رکوردی یافت نشد.</td>
-            </tr>
           </tbody>
         </table>
+        <div v-if="pagedRows.length === 0" class="mt-4">
+          <EmptyState title="هیچ رکوردی یافت نشد." description="فیلترها را بررسی یا پاک کنید." />
+        </div>
       </div>
 
       <div class="flex items-center justify-center gap-4">
