@@ -14,7 +14,7 @@ const circumference = 2 * Math.PI * 15.91549430918954;
 </script>
 
 <template>
-  <div class="card bg-base-100 shadow-sm">
+  <div class="app-card">
     <div class="card-body">
       <div class="flex items-start justify-between">
         <div>
@@ -24,7 +24,14 @@ const circumference = 2 * Math.PI * 15.91549430918954;
       </div>
       <div class="mt-4 flex flex-wrap items-center gap-6">
         <svg width="160" height="160" viewBox="0 0 42 42" class="shrink-0" role="img" aria-label="Currency distribution">
-          <circle cx="21" cy="21" r="15.9154943" fill="transparent" stroke="#e5e7eb" stroke-width="8"></circle>
+          <circle
+            cx="21"
+            cy="21"
+            r="15.9154943"
+            fill="transparent"
+            stroke="var(--chart-neutral)"
+            stroke-width="8"
+          ></circle>
           <g v-for="(seg, idx) in segments" :key="seg.currency">
             <circle
               cx="21"

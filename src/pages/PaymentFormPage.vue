@@ -121,15 +121,27 @@ const reset = (showToast = true) => {
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h2 class="card-title text-xl">فرم ثبت پرداخت</h2>
-        <p class="text-sm text-base-content/60">
+  <div class="page-container flex max-w-5xl flex-col gap-6">
+    <header class="page-header">
+      <div>
+        <h2 class="page-title">فرم ثبت پرداخت</h2>
+        <p class="page-subtitle">
           اطلاعات پرداخت را با دقت وارد کنید. تاریخ و زمان به صورت شمسی ثبت می‌شود.
         </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button class="btn btn-outline btn-sm" type="button" @click="reset">
+          پاک کردن فرم
+        </button>
+        <button class="btn btn-primary btn-sm" type="button" @click="submit">
+          ثبت پرداخت
+        </button>
+      </div>
+    </header>
 
-        <section class="mt-4 rounded-xl border border-base-300 bg-base-200/40 p-4">
+    <div class="app-card-strong">
+      <div class="card-body">
+        <section class="app-section">
           <h3 class="mb-4 text-sm font-semibold text-base-content/70">۱) شخص دریافت‌کننده</h3>
           <div class="flex flex-col gap-4">
             <div class="flex flex-wrap items-center gap-4">
@@ -174,7 +186,7 @@ const reset = (showToast = true) => {
           </div>
         </section>
 
-        <section class="mt-4 rounded-xl border border-base-300 bg-base-200/40 p-4">
+        <section class="app-section">
           <h3 class="mb-4 text-sm font-semibold text-base-content/70">۲) شخص پرداخت‌کننده</h3>
           <div class="flex flex-col gap-4">
             <div class="flex flex-wrap items-center gap-4">
@@ -219,7 +231,7 @@ const reset = (showToast = true) => {
           </div>
         </section>
 
-        <section class="mt-4 rounded-xl border border-base-300 bg-base-200/40 p-4">
+        <section class="app-section">
           <h3 class="mb-4 text-sm font-semibold text-base-content/70">۳) نوع پرداخت / ۴) نوع پول</h3>
           <div class="grid gap-4 md:grid-cols-2">
             <label class="form-control">
@@ -245,7 +257,7 @@ const reset = (showToast = true) => {
           </div>
         </section>
 
-        <section class="mt-4 rounded-xl border border-base-300 bg-base-200/40 p-4">
+        <section class="app-section">
           <h3 class="mb-4 text-sm font-semibold text-base-content/70">۵) مقدار</h3>
           <div class="grid gap-4 md:grid-cols-2">
             <label class="form-control">
@@ -268,7 +280,7 @@ const reset = (showToast = true) => {
           </div>
         </section>
 
-        <section class="mt-4 rounded-xl border border-base-300 bg-base-200/40 p-4">
+        <section class="app-section">
           <h3 class="mb-4 text-sm font-semibold text-base-content/70">۶) توضیحات</h3>
           <label class="form-control">
             <span class="label-text">شرح پرداخت</span>
@@ -281,7 +293,7 @@ const reset = (showToast = true) => {
           </label>
         </section>
 
-        <section class="mt-4 rounded-xl border border-base-300 bg-base-200/40 p-4">
+        <section class="app-section">
           <h3 class="mb-4 text-sm font-semibold text-base-content/70">۷) تاریخ و زمان</h3>
           <div class="grid gap-4 md:grid-cols-2">
             <label class="form-control">
@@ -305,15 +317,6 @@ const reset = (showToast = true) => {
             </label>
           </div>
         </section>
-
-        <div class="mt-6 flex flex-wrap gap-3">
-          <button class="btn btn-primary" type="button" @click="submit">
-            ثبت پرداخت
-          </button>
-          <button class="btn btn-outline" type="button" @click="reset">
-            پاک کردن فرم
-          </button>
-        </div>
 
         <div v-if="errors.length" class="mt-4 rounded-lg border border-error/30 bg-error/10 p-4">
           <p class="font-semibold text-error">خطاها:</p>

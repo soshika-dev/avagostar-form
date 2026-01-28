@@ -6,6 +6,7 @@ import KpiCard from '../components/KpiCard.vue';
 import MonthlyBarChart from '../components/MonthlyBarChart.vue';
 import CurrencyDonut from '../components/CurrencyDonut.vue';
 import ReportTable from '../components/ReportTable.vue';
+import EmptyState from '../components/EmptyState.vue';
 
 const store = useTransactionsStore();
 
@@ -134,7 +135,7 @@ const toggleMonthFilter = (monthValue) => {
   page.value = 1;
 };
 
-const colors = ['#4b7dd8', '#f97316', '#34d399', '#f472b6', '#f59e0b', '#a78bfa'];
+const colors = ['#005020', '#0E6A3B', '#178A4A', '#22C55E', '#059669', '#34D399'];
 
 const currencySegments = computed(() => {
   const totals = store.currencies.reduce((acc, currency) => {
@@ -259,9 +260,20 @@ watch([rowsPerPage, () => sortedTransactions.value.length], () => {
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+  <div class="page-container flex flex-col gap-6">
+    <header class="page-header">
+      <div>
+        <h2 class="page-title">داشبورد پرداخت‌ها</h2>
+        <p class="page-subtitle">مرور سریع وضعیت پرداخت‌ها و گزارش‌های مالی.</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button class="btn btn-outline btn-sm" type="button" @click="clearFilters">پاک کردن فیلترها</button>
+        <button class="btn btn-primary btn-sm" type="button" @click="exportCSV">خروجی CSV</button>
+      </div>
+    </header>
+
     <div class="grid gap-6 lg:grid-cols-[320px_1fr]">
-      <aside class="card bg-base-100 shadow-sm">
+      <aside class="app-card">
         <div class="card-body gap-4">
           <h3 class="text-base font-semibold">فیلترها</h3>
           <label class="form-control">
@@ -321,10 +333,6 @@ watch([rowsPerPage, () => sortedTransactions.value.length], () => {
               </option>
             </select>
           </label>
-          <div class="flex flex-wrap gap-2">
-            <button class="btn btn-outline" type="button" @click="clearFilters">پاک کردن</button>
-            <button class="btn btn-primary" type="button" @click="exportCSV">خروجی CSV</button>
-          </div>
         </div>
       </aside>
 
@@ -356,19 +364,19 @@ watch([rowsPerPage, () => sortedTransactions.value.length], () => {
       />
       <div class="grid gap-6">
         <CurrencyDonut :segments="currencySegments" :colors="colors" />
-        <div class="card bg-base-100 shadow-sm">
+        <div class="app-card">
           <div class="card-body gap-3">
             <h3 class="font-semibold">توزیع سریع</h3>
-            <div v-for="(seg, idx) in currencySegments" :key="seg.currency" class="space-y-2">
-              <div class="flex items-center justify-between text-sm">
-                <span class="font-semibold">{{ seg.currency }}</span>
-                <span class="text-base-content/60">{{ seg.label }}</span>
+            <div v-if="currencySegments.length" class="space-y-3">
+              <div v-for="(seg, idx) in currencySegments" :key="seg.currency" class="space-y-2">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="font-semibold">{{ seg.currency }}</span>
+                  <span class="text-base-content/60">{{ seg.label }}</span>
+                </div>
+                <progress class="progress progress-primary" :value="seg.percent" max="100"></progress>
               </div>
-              <progress class="progress" :class="`progress-primary`" :value="seg.percent" max="100"></progress>
             </div>
-            <div v-if="currencySegments.length === 0" class="text-sm text-base-content/60">
-              داده‌ای برای نمایش وجود ندارد.
-            </div>
+            <EmptyState v-else title="داده‌ای برای نمایش وجود ندارد." description="با ثبت تراکنش جدید، نمودارها کامل می‌شوند." />
           </div>
         </div>
       </div>
