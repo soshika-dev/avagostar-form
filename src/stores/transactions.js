@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
+import { apiClient } from '../services/apiClient.js';
+import { apiConfig } from '../services/apiConfig.js';
 
 const currencies = ['IRR', 'IRT', 'USD', 'EUR', 'AED', 'TRY'];
 const paymentMethods = [
@@ -7,65 +9,62 @@ const paymentMethods = [
   { value: 'account', label: 'حسابی/واریز' },
 ];
 
-const peoplePool = [
-  'علی رضایی',
-  'سجاد احمدی',
-  'مریم حسینی',
-  'رضا کریمی',
-  'فرهاد احمدی',
-  'شرکت آواگستر',
-  'شرکت توس',
-  'شرکت شرق',
-  'شرکت توسعه تجارت',
-  'شرکت تدبیر',
-];
-
-const randomInt = (min, max) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
-
-const randomFrom = (list) => list[randomInt(0, list.length - 1)];
-
-const buildRandomDate = () => {
-  const year = 2024 + randomInt(0, 1);
-  const month = randomInt(1, 12);
-  const day = randomInt(1, 28);
-  const hour = randomInt(8, 20);
-  const minute = randomInt(0, 59);
-  return new Date(year, month - 1, day, hour, minute, 0);
-};
-
-const generateFakeTransactions = (count = 220) =>
-  Array.from({ length: count }, (_, index) => {
-    const date = buildRandomDate();
-    const amount = randomInt(50000, 5000000);
-    return {
-      id: `tx-${index + 1}`,
-      receiver: {
-        type: Math.random() > 0.4 ? 'individual' : 'legal',
-        name: randomFrom(peoplePool),
-        id: String(randomInt(1000000000, 9999999999)),
-      },
-      payer: {
-        type: Math.random() > 0.4 ? 'individual' : 'legal',
-        name: randomFrom(peoplePool),
-        id: String(randomInt(1000000000, 9999999999)),
-      },
-      paymentMethod: randomFrom(paymentMethods).value,
-      currency: randomFrom(currencies),
-      amount,
-      description: 'پرداخت بابت قرارداد خدماتی',
-      datetimeISO: date.toISOString(),
-    };
-  });
+const normalizeTransaction = (item) => ({
+  id: item.id || item._id || `tx-${Date.now()}`,
+  receiver: item.receiver || {
+    type: item.receiverType || 'individual',
+    name: item.receiverName || item.receiver_title || '',
+    id: item.receiverId || item.receiver_identifier || '',
+  },
+  payer: item.payer || {
+    type: item.payerType || 'individual',
+    name: item.payerName || item.payer_title || '',
+    id: item.payerId || item.payer_identifier || '',
+  },
+  paymentMethod: item.paymentMethod || item.payment_method || 'cash',
+  currency: item.currency || 'IRR',
+  amount: Number(item.amount || 0),
+  description: item.description || '',
+  datetimeISO: item.datetimeISO || item.date || item.datetime || '',
+});
 
 export const useTransactionsStore = defineStore('transactions', () => {
-  const transactions = ref(generateFakeTransactions());
+  const transactions = ref([]);
+  const loading = ref(false);
+  const error = ref('');
 
-  const addTransaction = (payload) => {
-    transactions.value.unshift({
-      ...payload,
-      id: `tx-${Date.now()}`,
-    });
+  const fetchTransactions = async () => {
+    loading.value = true;
+    error.value = '';
+    try {
+      const payload = await apiClient.request(apiConfig.transactions.list);
+      const items = payload.data || payload.transactions || payload || [];
+      transactions.value = Array.isArray(items) ? items.map(normalizeTransaction) : [];
+    } catch (err) {
+      error.value = err.message;
+      transactions.value = [];
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const addTransaction = async (payload) => {
+    loading.value = true;
+    error.value = '';
+    try {
+      const result = await apiClient.request(apiConfig.transactions.create, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      const normalized = normalizeTransaction(result.data || result.transaction || result);
+      transactions.value.unshift(normalized);
+      return { ok: true, transaction: normalized };
+    } catch (err) {
+      error.value = err.message;
+      return { ok: false, message: err.message };
+    } finally {
+      loading.value = false;
+    }
   };
 
   const totalAmount = computed(() =>
@@ -74,8 +73,11 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
   return {
     transactions,
+    loading,
+    error,
     currencies,
     paymentMethods,
+    fetchTransactions,
     addTransaction,
     totalAmount,
   };

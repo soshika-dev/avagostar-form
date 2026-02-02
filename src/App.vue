@@ -26,6 +26,7 @@ watch(theme, (value) => {
 
 onMounted(() => {
   applyTheme(theme.value);
+  auth.fetchCurrentUser();
 });
 </script>
 

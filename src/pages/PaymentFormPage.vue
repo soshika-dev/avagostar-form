@@ -4,6 +4,7 @@ import DatePicker from 'vue3-persian-datetime-picker';
 import { useTransactionsStore, formatNumber } from '../stores/transactions.js';
 
 const transactionsStore = useTransactionsStore();
+const submitting = computed(() => transactionsStore.loading);
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '—';
 
@@ -83,12 +84,12 @@ const pushToast = (message, type = 'success') => {
   }, 3000);
 };
 
-const submit = () => {
+const submit = async () => {
   if (!validate()) {
     pushToast('لطفاً خطاهای فرم را برطرف کنید.', 'error');
     return;
   }
-  transactionsStore.addTransaction({
+  const result = await transactionsStore.addTransaction({
     receiver: { ...form.receiver },
     payer: { ...form.payer },
     paymentMethod: form.paymentMethod,
@@ -97,6 +98,10 @@ const submit = () => {
     description: form.description,
     datetimeISO: form.datetimeISO,
   });
+  if (!result.ok) {
+    pushToast(result.message || 'ثبت پرداخت ناموفق بود.', 'error');
+    return;
+  }
   pushToast('پرداخت با موفقیت ثبت شد.', 'success');
   reset(false);
 };
@@ -130,11 +135,11 @@ const reset = (showToast = true) => {
         </p>
       </div>
       <div class="flex flex-wrap gap-2">
-        <button class="btn btn-outline btn-sm" type="button" @click="reset">
+        <button class="btn btn-outline btn-sm" type="button" :disabled="submitting" @click="reset">
           پاک کردن فرم
         </button>
-        <button class="btn btn-primary btn-sm" type="button" @click="submit">
-          ثبت پرداخت
+        <button class="btn btn-primary btn-sm" type="button" :disabled="submitting" @click="submit">
+          {{ submitting ? 'در حال ثبت...' : 'ثبت پرداخت' }}
         </button>
       </div>
     </header>

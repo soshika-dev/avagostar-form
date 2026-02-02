@@ -12,15 +12,19 @@ const password = ref('');
 const code = ref('');
 const newPassword = ref('');
 const error = ref('');
+const loading = ref(false);
 
 const goToLogin = () => {
   step.value = 'login';
   error.value = '';
 };
 
-const login = () => {
+const login = async () => {
+  if (loading.value) return;
   error.value = '';
-  const result = auth.login(username.value.trim(), password.value);
+  loading.value = true;
+  const result = await auth.login(username.value.trim(), password.value);
+  loading.value = false;
   if (!result.ok) {
     error.value = result.message;
     return;
@@ -28,28 +32,33 @@ const login = () => {
   router.push({ name: 'form' });
 };
 
-const sendCode = () => {
+const sendCode = async () => {
+  if (loading.value) return;
   error.value = '';
-  if (!auth.hasUser(username.value.trim())) {
-    error.value = 'کاربر یافت نشد.';
-    return;
-  }
-  window.alert('کد بازیابی: 123456');
-  step.value = 'verify';
-};
-
-const resetPassword = () => {
-  error.value = '';
-  const result = auth.resetPassword(
-    username.value.trim(),
-    code.value.trim(),
-    newPassword.value,
-  );
+  loading.value = true;
+  const result = await auth.requestResetCode(username.value.trim());
+  loading.value = false;
   if (!result.ok) {
     error.value = result.message;
     return;
   }
-  window.alert('رمز عبور با موفقیت تغییر کرد.');
+  step.value = 'verify';
+};
+
+const resetPassword = async () => {
+  if (loading.value) return;
+  error.value = '';
+  loading.value = true;
+  const result = await auth.resetPassword(
+    username.value.trim(),
+    code.value.trim(),
+    newPassword.value,
+  );
+  loading.value = false;
+  if (!result.ok) {
+    error.value = result.message;
+    return;
+  }
   code.value = '';
   newPassword.value = '';
   step.value = 'login';
@@ -87,8 +96,8 @@ const resetPassword = () => {
                 placeholder="رمز عبور"
               />
             </label>
-            <button class="btn btn-primary w-full" type="button" @click="login">
-              ورود
+            <button class="btn btn-primary w-full" type="button" :disabled="loading" @click="login">
+              {{ loading ? 'در حال بررسی...' : 'ورود' }}
             </button>
             <button class="btn btn-ghost btn-sm" type="button" @click="step = 'forgot'">
               فراموشی رمز عبور؟
@@ -104,8 +113,8 @@ const resetPassword = () => {
                 placeholder="نام کاربری"
               />
             </label>
-            <button class="btn btn-primary w-full" type="button" @click="sendCode">
-              ارسال کد تایید
+            <button class="btn btn-primary w-full" type="button" :disabled="loading" @click="sendCode">
+              {{ loading ? 'در حال ارسال...' : 'ارسال کد تایید' }}
             </button>
             <button class="btn btn-ghost btn-sm" type="button" @click="goToLogin">
               بازگشت
@@ -126,8 +135,8 @@ const resetPassword = () => {
                 placeholder="رمز جدید"
               />
             </label>
-            <button class="btn btn-primary w-full" type="button" @click="resetPassword">
-              تغییر رمز عبور
+            <button class="btn btn-primary w-full" type="button" :disabled="loading" @click="resetPassword">
+              {{ loading ? 'در حال ذخیره...' : 'تغییر رمز عبور' }}
             </button>
             <button class="btn btn-ghost btn-sm" type="button" @click="goToLogin">
               بازگشت

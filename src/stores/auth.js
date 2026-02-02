@@ -1,53 +1,95 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
+import { apiClient } from '../services/apiClient.js';
+import { apiConfig } from '../services/apiConfig.js';
 
-const demoUsers = [
-  { username: 'admin', password: 'admin123' },
-  { username: 'user1', password: '1111' },
-  { username: 'user2', password: '2222' },
-];
+const storageKey = 'avagostar-auth';
 
 export const useAuthStore = defineStore('auth', () => {
-  const users = ref([...demoUsers]);
   const currentUser = ref(null);
+  const token = ref(localStorage.getItem(storageKey) || '');
 
-  const login = (username, password) => {
-    const match = users.value.find(
-      (user) => user.username === username && user.password === password,
-    );
-    if (!match) {
-      return { ok: false, message: 'اطلاعات ورود اشتباه است.' };
+  const setSession = (payload = {}) => {
+    currentUser.value = payload.user || payload.currentUser || null;
+    token.value = payload.token || token.value || '';
+    if (token.value) {
+      localStorage.setItem(storageKey, token.value);
+    } else {
+      localStorage.removeItem(storageKey);
     }
-    currentUser.value = { username: match.username };
-    return { ok: true };
+  };
+
+  const login = async (username, password) => {
+    try {
+      const payload = await apiClient.request(apiConfig.auth.login, {
+        method: 'POST',
+        body: JSON.stringify({ username, password }),
+      });
+      setSession(payload);
+      return { ok: true, payload };
+    } catch (error) {
+      return { ok: false, message: error.message };
+    }
   };
 
   const logout = () => {
     currentUser.value = null;
+    token.value = '';
+    localStorage.removeItem(storageKey);
   };
 
-  const resetPassword = (username, code, newPassword) => {
-    if (code !== '123456') {
-      return { ok: false, message: 'کد تایید نادرست است.' };
+  const requestResetCode = async (username) => {
+    try {
+      await apiClient.request(apiConfig.auth.requestReset, {
+        method: 'POST',
+        body: JSON.stringify({ username }),
+      });
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, message: error.message };
     }
-    const target = users.value.find((user) => user.username === username);
-    if (!target) {
-      return { ok: false, message: 'کاربر یافت نشد.' };
-    }
-    target.password = newPassword;
-    return { ok: true };
   };
 
-  const hasUser = (username) =>
-    users.value.some((user) => user.username === username);
+  const resetPassword = async (username, code, newPassword) => {
+    try {
+      await apiClient.request(apiConfig.auth.resetPassword, {
+        method: 'POST',
+        body: JSON.stringify({
+          username,
+          code,
+          password: newPassword,
+        }),
+      });
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, message: error.message };
+    }
+  };
+
+  const fetchCurrentUser = async () => {
+    if (!token.value) return null;
+    try {
+      const payload = await apiClient.request(apiConfig.auth.me, {
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
+      });
+      setSession({ ...payload, token: token.value });
+      return currentUser.value;
+    } catch (error) {
+      logout();
+      return null;
+    }
+  };
 
   return {
-    users,
     currentUser,
+    token,
     login,
     logout,
+    requestResetCode,
     resetPassword,
-    hasUser,
+    fetchCurrentUser,
     isAuthenticated: computed(() => Boolean(currentUser.value)),
   };
 });
