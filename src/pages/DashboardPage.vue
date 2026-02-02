@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import DatePicker from 'vue3-persian-datetime-picker';
 import { useTransactionsStore, formatNumber, formatPersianDate } from '../stores/transactions.js';
 import KpiCard from '../components/KpiCard.vue';
@@ -257,6 +257,10 @@ const updateRowsPerPage = (value) => {
 watch([rowsPerPage, () => sortedTransactions.value.length], () => {
   if (page.value > totalPages.value) page.value = 1;
 });
+
+onMounted(() => {
+  store.fetchTransactions();
+});
 </script>
 
 <template>
@@ -353,6 +357,13 @@ watch([rowsPerPage, () => sortedTransactions.value.length], () => {
           subtitle="نمایش‌شده"
         />
       </section>
+    </div>
+
+    <div v-if="store.loading" class="rounded-xl border border-base-300 bg-base-100 p-4 text-sm text-base-content/70">
+      در حال دریافت اطلاعات از سرور...
+    </div>
+    <div v-else-if="store.error" class="rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error">
+      {{ store.error }}
     </div>
 
     <div class="grid gap-6 lg:grid-cols-[2fr_1fr]">
