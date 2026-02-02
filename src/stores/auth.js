@@ -104,6 +104,6 @@ export const useAuthStore = defineStore('auth', () => {
     requestResetCode,
     resetPassword,
     fetchCurrentUser,
-    isAuthenticated: computed(() => Boolean(currentUser.value)),
+    isAuthenticated: computed(() => Boolean(token.value || currentUser.value)),
   };
 });
