@@ -1,5 +1,5 @@
 export const apiConfig = {
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000',
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001',
   auth: {
     login: import.meta.env.VITE_API_LOGIN_PATH || '/auth/login',
     requestReset: import.meta.env.VITE_API_RESET_REQUEST_PATH || '/auth/forgot-password',
