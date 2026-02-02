@@ -10,8 +10,22 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem(storageKey) || '');
 
   const setSession = (payload = {}) => {
-    currentUser.value = payload.user || payload.currentUser || null;
-    token.value = payload.token || token.value || '';
+    const data = payload.data || {};
+    currentUser.value =
+      payload.user ||
+      payload.currentUser ||
+      data.user ||
+      data.currentUser ||
+      null;
+    token.value =
+      payload.token ||
+      payload.accessToken ||
+      payload.access_token ||
+      data.token ||
+      data.accessToken ||
+      data.access_token ||
+      token.value ||
+      '';
     if (token.value) {
       localStorage.setItem(storageKey, token.value);
     } else {

@@ -17,15 +17,28 @@ const parseJson = async (response) => {
   return response.json();
 };
 
+const getStoredToken = () => {
+  const rawToken = localStorage.getItem(authStorageKey) || '';
+  return rawToken.replace(/^Bearer\s+/i, '').trim();
+};
+
+const getCsrfToken = () =>
+  document
+    .querySelector('meta[name="csrf-token"], meta[name="csrf"]')
+    ?.getAttribute('content');
+
 export const apiClient = {
   async request(path, options = {}) {
-    const token = localStorage.getItem(authStorageKey);
+    const token = getStoredToken();
+    const csrfToken = getCsrfToken();
     const response = await fetch(buildUrl(path), {
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
         ...(options.headers || {}),
       },
+      credentials: 'include',
       ...options,
     });
 
