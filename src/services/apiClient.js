@@ -5,7 +5,7 @@ const authStorageKey = 'avagostar-auth';
 const buildUrl = (path) => {
   if (!path) return apiConfig.baseUrl;
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
-  return `${apiConfig.baseUrl.replace(/\\/$/, '')}${path.startsWith('/') ? '' : '/'}${path}`;
+  return `${apiConfig.baseUrl.replace(/\/$/, '')}${path.startsWith('/') ? '' : '/'}${path}`;
 };
 
 const parseJson = async (response) => {
