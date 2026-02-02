@@ -60,7 +60,14 @@ export const useTransactionsStore = defineStore('transactions', () => {
       transactions.value.unshift(normalized);
       return { ok: true, transaction: normalized };
     } catch (err) {
-      error.value = err.message;
+      const statusMatch = err.message.match(/\((\d{3})\)$/);
+      const statusCode = statusMatch ? Number(statusMatch[1]) : null;
+      if (statusCode === 401) {
+        error.value =
+          'اجازه ثبت تراکنش ندارید. ابتدا وارد شوید یا با پشتیبانی هماهنگ کنید.';
+      } else {
+        error.value = err.message;
+      }
       return { ok: false, message: err.message };
     } finally {
       loading.value = false;
