@@ -38,7 +38,7 @@ export const apiClient = {
         ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
         ...(options.headers || {}),
       },
-      credentials: 'include',
+      credentials: options.credentials ?? 'omit',
       ...options,
     });
 
