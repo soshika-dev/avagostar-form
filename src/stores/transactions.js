@@ -9,18 +9,52 @@ const paymentMethods = [
   { value: 'account', label: 'حسابی/واریز' },
 ];
 
+const firstDefined = (...values) => values.find((value) => value !== undefined && value !== null);
+
+const normalizeParty = (party, fallback = {}) => {
+  if (typeof party === 'string') {
+    return {
+      type: fallback.type || 'individual',
+      name: party,
+      id: fallback.id || '',
+    };
+  }
+  const source = party && typeof party === 'object' ? party : {};
+  return {
+    type: firstDefined(source.type, source.partyType, fallback.type, 'individual'),
+    name: firstDefined(source.name, source.title, source.fullName, source.displayName, fallback.name, ''),
+    id: firstDefined(source.id, source.identifier, source.nationalId, source.code, fallback.id, ''),
+  };
+};
+
 const normalizeTransaction = (item) => ({
   id: item.id || item._id || `tx-${Date.now()}`,
-  receiver: item.receiver || {
-    type: item.receiverType || 'individual',
-    name: item.receiverName || item.receiver_title || '',
-    id: item.receiverId || item.receiver_identifier || '',
-  },
-  payer: item.payer || {
-    type: item.payerType || 'individual',
-    name: item.payerName || item.payer_title || '',
-    id: item.payerId || item.payer_identifier || '',
-  },
+  receiver: normalizeParty(firstDefined(item.receiver, item.payee, item.recipient, item.beneficiary), {
+    type: firstDefined(item.receiverType, item.payeeType),
+    name: firstDefined(
+      item.receiverName,
+      item.receiver_title,
+      item.receiver_name,
+      item.payeeName,
+      item.payee_title,
+      item.payee_name,
+      item.recipient_name,
+    ),
+    id: firstDefined(item.receiverId, item.receiver_identifier, item.payeeId, item.payee_identifier),
+  }),
+  payer: normalizeParty(firstDefined(item.payer, item.sender, item.customer), {
+    type: firstDefined(item.payerType, item.senderType),
+    name: firstDefined(
+      item.payerName,
+      item.payer_title,
+      item.payer_name,
+      item.senderName,
+      item.sender_title,
+      item.sender_name,
+      item.customer_name,
+    ),
+    id: firstDefined(item.payerId, item.payer_identifier, item.senderId, item.sender_identifier),
+  }),
   paymentMethod: item.paymentMethod || item.payment_method || 'cash',
   currency: item.currency || 'IRR',
   amount: Number(item.amount || 0),
